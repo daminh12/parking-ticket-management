@@ -13,7 +13,7 @@ __pycache__/
 tempCodeRunnerFile.ipynb
 t.ipynb
 test.ipynb
-main_ui.ui 
+main_ui.ui
 
 # Local generated files
 image_data/*
@@ -26,3 +26,10 @@ __pycache__/
 *.pyc
 .idea/
 .vscode/
+
+# TV4 local test artifacts
+.pytest_cache/
+.ruff_cache/
+.venv-tv4/
+test-results/
+
