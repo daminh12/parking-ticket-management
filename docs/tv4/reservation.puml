@@ -1,0 +1,34 @@
+@startuml
+title TV4 - Activity đặt chỗ (bản thiết kế cần nhóm duyệt)
+|Người dùng|
+start
+:Nhập bộ lọc và chọn chỗ;
+:Xác nhận thông tin đặt;
+|Giao diện TV4|
+if (Đầu vào hợp lệ?) then (Có)
+  :Gửi yêu cầu đặt;
+else (Không)
+  :Hiển thị lỗi nhập liệu;
+  stop
+endif
+|Backend TV2|
+:Kiểm tra quyền và điều kiện đặt;
+:Kiểm tra xung đột trong giao dịch;
+if (Chỗ còn đủ điều kiện?) then (Có)
+  |CSDL|
+  :Lưu reservation và trạng thái nguyên tử;
+  if (Commit thành công?) then (Có)
+    |Giao diện TV4|
+    :Hiển thị mã đặt và tải lại trạng thái;
+  else (Không)
+    |Backend TV2|
+    :Rollback và trả lỗi;
+    |Giao diện TV4|
+    :Báo chưa thể hoàn tất;
+  endif
+else (Không)
+  |Giao diện TV4|
+  :Báo xung đột và tải lại trạng thái;
+endif
+stop
+@enduml

@@ -1,0 +1,34 @@
+@startuml
+title TV4 - Activity xe ra (bản thiết kế cần nhóm duyệt)
+|Nhân viên|
+start
+:Xác nhận biển số xe ra;
+|Backend TV1/TV2|
+:Kiểm tra quyền và tìm phiên đang mở;
+if (Có phiên hợp lệ?) then (Có)
+  |Dịch vụ phí TV3|
+  :Tính phí theo quy tắc được duyệt;
+  |Giao diện TV4|
+  :Hiển thị thông tin và phí;
+  |Nhân viên|
+  if (Xác nhận hoàn tất theo SRS?) then (Có)
+    |CSDL|
+    :Giao dịch kết thúc phiên, lưu phí và giải phóng chỗ;
+    if (Commit thành công?) then (Có)
+      |Giao diện TV4|
+      :Hiển thị kết quả và giữ lịch sử;
+    else (Không)
+      |Backend TV1/TV2|
+      :Rollback, giữ phiên đang mở;
+      |Giao diện TV4|
+      :Báo chưa thể hoàn tất;
+    endif
+  else (Không)
+    :Giữ nguyên phiên gửi;
+  endif
+else (Không)
+  |Giao diện TV4|
+  :Báo không có phiên đang mở;
+endif
+stop
+@enduml
