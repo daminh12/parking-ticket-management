@@ -63,4 +63,41 @@ và thiết đặt image_out là ảnh được vẽ (box và kí tự lên trê
                 # Vẽ lên màn box và biển
             cv2.putText(self.image_output, str(digit), (x, y - 10), cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 0, 255), 2)
             cv2.rectangle(self.image_output, (x, y), (x1, y1), (0, 255, 0), 2)
+
+    # Hàm xử lý đọc kí tự và sắp xếp lại chúng
+    def process_ocr(self, data_center_labe: list, labels_encoder: dict):
+        '''Hàm này dùng để nhận biết loại biển đang nhận diện là loại 1 dòng hay 2 dòng
+loại 1 dòng thì chỉ cần sắp xếp box theo trục x rồi lấy label của nó và ghép lại
+loại 2 dòng thì phải làm tương tự nhưng mà phải lấy từ trên xuống dưới
+đầu vào gồm 1 mảng np.array 2D mà các cột lần lượt là x_center, y_center, label đã được mã hóa của box
+và dict giải mã của label (labels_encoder), trả về kí tự hoàn chỉnh của biển số
+'''
+        # Tính khoảng cách theo lớn nhất của các box theo trục y
+        delta_y_max = np.max(data_center_labe[:, 1]) - np.min(data_center_labe[:, 1])
+        
+        out_ocr = None
+        # Nếu lớn hơn 30 thì là biển loại 2 dòng
+        if(delta_y_max > 30):
+            # Tính tọa độ y trung bình để phân loại dòng thứ nhất và dòng thứ 2
+            y_mean = np.mean(data_center_labe[:, 1])
+            
+            # y < y_mean là dòng 1 và ngược lại 
+            line1 = data_center_labe[data_center_labe[:, 1] < y_mean]
+            line2 = data_center_labe[data_center_labe[:, 1] >= y_mean]
+
+            # Sắp xếp 2 dòng theo trục x để đọc dữ liệu từ trái sang phải
+            # line1[:, 0].argsort() sort mảng 2D theo cột đầu và đưa ra mảng np.array là các chỉ mục thay vì là giá trị 
+            line1 = line1[line1[:, 0].argsort()]
+            line2 = line2[line2[:, 0].argsort()]
+            # Đọc kí tự từ line1 rồi ghép với line2 
+            # label được mã hóa nằm ở cột cuối cùng của từng mảng 2D line1 và line2 (truy xuất bằng chỉ mục -1)
+            out_ocr = ''.join([labels_encoder[item] for item in line1[:,-1]])
+            out_ocr += ' - ' + ''.join([labels_encoder[item] for item in line2[:,-1]])
+        else:
+            # Chỉ cần sắp xếp theo trục x rồi ghép các label lại 
+            data_center_labe = data_center_labe[data_center_labe[:, 0].argsort()]
+            out_ocr = ''.join([labels_encoder[item] for item in data_center_labe[:,-1]])
+            
+            out_ocr = out_ocr[:3] + ' - ' + out_ocr[3:]
+        return out_ocr
     
