@@ -1,0 +1,32 @@
+@startuml
+title TV4 - Activity xe vào (bản thiết kế cần nhóm duyệt)
+|Nhân viên|
+start
+:Nhận biển số và xác nhận xe vào;
+|Giao diện TV4|
+if (Biển số/ảnh hợp lệ?) then (Có)
+  :Gửi yêu cầu tiếp nhận;
+else (Không)
+  :Yêu cầu nhận lại biển số;
+  stop
+endif
+|Backend TV1/TV2|
+:Kiểm tra quyền, phiên đang mở và chỗ;
+if (Đủ điều kiện tiếp nhận?) then (Có)
+  |CSDL|
+  :Giao dịch tạo phiên gửi và cập nhật chỗ;
+  if (Commit thành công?) then (Có)
+    |Giao diện TV4|
+    :Hiển thị phiên gửi, giờ vào và ảnh;
+  else (Không)
+    |Backend TV1/TV2|
+    :Rollback và trả lỗi;
+    |Giao diện TV4|
+    :Không báo tiếp nhận thành công;
+  endif
+else (Không)
+  |Giao diện TV4|
+  :Thông báo đã có phiên hoặc không đủ điều kiện;
+endif
+stop
+@enduml
