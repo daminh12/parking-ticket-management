@@ -31,3 +31,17 @@ và ảnh `image` được đưa vào chứ trong đó, tên của ảnh sẽ l�
             shutil.rmtree(path_dir)  # Xóa cả thư mục và file bên trong
         except FileNotFoundError:
             print('Không tồn tại label')
+
+    # Hàm này trả về thời gian ngày giờ ảnh được lưu trong thư mục label, chính là tên của ảnh luôn
+    def get_data(self, label):
+        if self.check_exists(label= label):
+            path = path_root + '/' + label
+            files = [f for f in os.listdir(path= path) if f.lower().endswith(('.jpg', '.png', '.jpeg'))]
+            if not files:
+                return 'Không có ảnh', None
+            img_name = str(files[0])
+            img_array = cv2.imread(os.path.join(path, img_name))
+            date_time_img = img_name[:-4].replace('-', ':', 2)
+            return date_time_img, img_array
+        else:
+            return 'Xe chưa vào bãi', None
